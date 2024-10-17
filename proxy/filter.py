@@ -1,11 +1,11 @@
 from mitmproxy import http
-import json
 from module import *
+import json
 
 FILTER_KEYWORDS = filterd_target_from_file('filter/keyword.txt')
 
 
-def filter_gpt_prompt(flow: http.HTTPFlow)-> None:
+def filtering_prompt(flow: http.HTTPFlow)-> None:
     """
     gpt에게 하는 질문을 필터링 하는 함수
     필터링 되는 단어가 포함되어 있을 경우 '차단된 프롬프트입니다' 메시지 생성
@@ -17,11 +17,19 @@ def filter_gpt_prompt(flow: http.HTTPFlow)-> None:
     if flow.request.headers.get("Content-Type") == "application/json":
         try:
             data = flow.request.json()
+            print("------------------------------------------------------------------------")
+            print(data)
+            flow.response = data_filtering()
+            # data에서 입력값 파싱하는 코드 추가
 
-            # 프롬프트 필드에 특정 키워드가 포함되어 있는지 확인              
-            content = find_value(data, "parts")
-            if any(keyword in content for keyword in FILTER_KEYWORDS):
-                # 프롬프트를 필터링할 경우, 사용자에게 경고 메시지 반환
-                flow.response = response_make(404,json.dumps({"error": "차단된 프롬프트입니다. 요청이 거부되었습니다."}), {"Content-Type": "application/json"} )
+            # 필터링 키워드 확인
+
+
+            # 필터링에 걸렸을 경우 아래 함수 호출
+            # flow.response = data_filtering(data)
+
         except Exception as e:
             print(f"Error processing request: {e}")
+
+    else: 
+        pass

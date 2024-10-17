@@ -2,6 +2,7 @@ from mitmproxy import http
 import json
 from module import *
 from filter import *
+from datetime import datetime
 
 def filterd_target_from_file(file_path: str) -> list:
     """
@@ -55,4 +56,38 @@ def response_make(code=404, message="Filtered page", data={"Content-Type": "text
         code,
         message.encode(),
         data
+    )
+
+
+def data_filtering(flow: http.HTTPFlow) -> http.Response:
+    """
+    요청 데이터에서 필터링 키워드가 있는지 확인하고,
+    키워드가 발견되면 차단된 메시지로 응답을 수정합니다.
+
+    :param data: 요청 데이터 (JSON 형식)
+    :return: http.Response
+    """
+    current_time = datetime.utcnow().isoformat() + "Z"  # ISO 8601 형식으로 현재 시간
+    
+    # 차단된 프롬프트 메시지 생성
+    response_data = {
+        "ops": [
+            {
+                "op": "add",
+                "path": "/logs/StrOutputParser/final_output",
+                "value": {"output": "사용할 수 없는 키워드입니다."}
+            },
+            {
+                "op": "add",
+                "path": "/logs/StrOutputParser/end_time",
+                "value": current_time  # 현재 시간을 동적으로 추가
+            }
+        ]
+    }
+    
+    # 응답 수정
+    return http.Response.make(
+        200,  # HTTP 상태 코드
+        json.dumps(response_data).encode(),  # JSON 데이터
+        {"Content-Type": "text/event-stream"}  # 헤더
     )
