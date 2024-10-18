@@ -45,18 +45,28 @@ def find_value(json_data, target_key):
                 return result
     return None
 
-def response_make(code=404, message="Filtered page", data={"Content-Type": "text/html"}) -> http.Response:
+def response_make(code=399, message="Filltering your prompt", header={"Content-Type": "text/event-stream"}) -> http.Response:
     """
-    반환할 응답을 생성하는 코드
+    500 Internal Server Error 응답을 생성하는 코드
     
-    :param: code=404, message="Filtered page", data={"Content-Type": "text/html"} 
-    :return: http.response
+    :param: code=500, message="Internal Server Error", header={"Content-Type": "text/event-stream"} 
+    :return: http.Response
     """
+    # 에러 이벤트 데이터 생성
+    error_data = {
+        "status_code": code,
+        "message": message
+    }
+
+    # event-stream 형식으로 데이터 반환
+    event_stream_data = f'event: error\ndata: {json.dumps(error_data)}\n\n'
+
     return http.Response.make(
         code,
-        message.encode(),
-        data
+        event_stream_data.encode(),
+        header
     )
+
 
 # 연결 안되어 있을경우 반환하는 오류 패킷을 활용하여 금지된 prompt라는 오류가 발생되도록 활용 예정
 def block_prompt(flow: http.HTTPFlow) -> http.Response:
@@ -67,32 +77,7 @@ def block_prompt(flow: http.HTTPFlow) -> http.Response:
     :param data: 요청 데이터 (JSON 형식)
     :return: http.Response
     """
-    # current_time = datetime.utcnow().isoformat() + "Z"  # ISO 8601 형식으로 현재 시간
-    
-    # # 차단된 프롬프트 메시지 생성
-    # response_data = {
-    #     "ops": [
-    #         {
-    #             "op": "add",
-    #             "path": "/logs/StrOutputParser/final_output",
-    #             "value": {"output": "사용할 수 없는 키워드입니다."}
-    #         },
-    #         {
-    #             "op": "add",
-    #             "path": "/logs/StrOutputParser/end_time",
-    #             "value": current_time  # 현재 시간을 동적으로 추가
-    #         }
-    #     ]
-    # }
-    
-    # # 응답 수정
-    # return http.Response.make(
-    #     200,  # HTTP 상태 코드
-    #     json.dumps(response_data).encode(),  # JSON 데이터
-    #     {"Content-Type": "text/event-stream"}  # 헤더
-    # )
-
-    return None
+    return response_make()
 
 def checking_human_message(data, FILTER_KEYWORDS):
     """

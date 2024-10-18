@@ -18,8 +18,9 @@ def filtering_prompt(flow: http.HTTPFlow, FILTER_KEYWORDS)-> None:
 
             # prompt filtering
             if checking_human_message(data, FILTER_KEYWORDS):
-                print("filter")
-                # flow.response = block_prompt()
+                print("-----------"*3)
+                print(data)
+                flow.response = block_prompt(flow)
 
             # no problem
             else:
