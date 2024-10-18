@@ -9,6 +9,7 @@ from typing import Any, Callable, Dict, List, Optional, Union
 
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 
+# llm = ChatOllama(model="Llama-3-Open-Ko-8B-Q8_0:latest", streaming=False)
 llm = ChatOllama(model="Llama-3-Open-Ko-8B-Q8_0:latest")
 
 prompt = ChatPromptTemplate.from_messages([
